@@ -14,6 +14,9 @@ const Note = mongoose.model("Note", {
   },
   edit: {
     type: Boolean
+  },
+  color: {
+    type: String
   }
 });
 
