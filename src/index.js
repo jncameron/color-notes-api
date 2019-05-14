@@ -95,6 +95,21 @@ app.post("/signin", (req, res) => {
     });
 });
 
+app.post("/updatenote", (req, res) => {
+  Note.findByIdAndUpdate(
+    req.body.note_id,
+    { note_body: req.body.updatedText },
+    { new: true }
+  )
+    .then(note => {
+      console.log(note);
+      res.send(note);
+    })
+    .catch(e => {
+      res.status(500).send(e);
+    });
+});
+
 app.listen(port, () => {
   console.log("Server is running on port " + port);
 });
