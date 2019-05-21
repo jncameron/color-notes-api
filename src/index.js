@@ -24,16 +24,29 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/users", (req, res) => {
-  const user = new User(req.body, req.password);
-  user
-    .save()
-    .then(() => {
-      res.status(201).send(user);
-    })
-    .catch(e => {
-      res.status(400).send("not work, homie: " + e);
-    });
+app.post("/users", async (req, res) => {
+  try {
+    const user = new User(req.body, req.password);
+    const token = await user.generateAuthToken();
+
+    user.save();
+    res.status(201).send({ user, token });
+  } catch (e) {
+    res.status(400).send("not work, homie: " + e);
+  }
+});
+
+app.post("/signin", async (req, res) => {
+  try {
+    const user = await User.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    const token = await user.generateAuthToken();
+    res.send({ user, token });
+  } catch (e) {
+    res.status(400).send("no dice");
+  }
 });
 
 app.post("/notes", (req, res) => {
@@ -79,18 +92,6 @@ app.post("/loadnotes", (req, res) => {
     .catch(e => {
       res.status(400).send(e);
     });
-});
-
-app.post("/signin", async (req, res) => {
-  try {
-    const user = await User.findByCredentials(
-      req.body.email,
-      req.body.password
-    );
-    res.send(user);
-  } catch (e) {
-    res.status(400).send("no dice");
-  }
 });
 
 app.post("/updatenote", (req, res) => {
