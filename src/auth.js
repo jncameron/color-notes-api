@@ -14,7 +14,6 @@ const auth = async (req, res, next) => {
       throw new Error();
     }
 
-    console.log("Authorized!");
     req.user = user;
     next();
   } catch (e) {

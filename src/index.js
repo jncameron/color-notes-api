@@ -1,4 +1,5 @@
 const path = require("path");
+const jwt = require("jsonwebtoken");
 
 const express = require("express");
 require("./db/mongoose");
@@ -47,6 +48,23 @@ app.post("/signin", async (req, res) => {
     res.send({ user, token });
   } catch (e) {
     res.status(400).send("no dice");
+  }
+});
+
+app.post("/istoken", async (req, res) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  const decoded = jwt.verify(token, "thisishowyoudoit");
+  try {
+    const user = await User.findOne({
+      _id: decoded._id,
+      "tokens.token": token
+    });
+
+    res.status(200).send(user);
+  } catch (e) {
+    console.log(e);
+
+    res.status(401).send({ error: "Please Authenticate" });
   }
 });
 
@@ -102,7 +120,6 @@ app.post("/updatenote", auth, (req, res) => {
     { new: true }
   )
     .then(note => {
-      console.log(note);
       res.send(note);
     })
     .catch(e => {
