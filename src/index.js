@@ -4,6 +4,7 @@ const express = require("express");
 require("./db/mongoose");
 const User = require("./models/user");
 const Note = require("./models/note");
+const auth = require("./auth");
 
 const app = express();
 const port = process.env.PORT || 8081;
@@ -15,7 +16,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
   res.setHeader(
     "Access-Control-Allow-Methods",
@@ -49,7 +50,7 @@ app.post("/signin", async (req, res) => {
   }
 });
 
-app.post("/notes", (req, res) => {
+app.post("/notes", auth, (req, res) => {
   const note = new Note(req.body);
   note
     .save()
@@ -61,7 +62,7 @@ app.post("/notes", (req, res) => {
     });
 });
 
-app.post("/completenote", (req, res) => {
+app.post("/completenote", auth, (req, res) => {
   const _id = req.body.note_id;
   Note.findByIdAndUpdate(_id, { completed: true })
     .then(note => {
@@ -72,7 +73,7 @@ app.post("/completenote", (req, res) => {
     });
 });
 
-app.post("/deletenote", (req, res) => {
+app.post("/deletenote", auth, (req, res) => {
   const _id = req.body.id;
   Note.deleteMany({ user_id: _id, completed: true })
     .then(() => {
@@ -83,7 +84,7 @@ app.post("/deletenote", (req, res) => {
     });
 });
 
-app.post("/loadnotes", (req, res) => {
+app.post("/loadnotes", auth, (req, res) => {
   const id = req.body.user_id;
   Note.find({ user_id: id })
     .then(notes => {
@@ -94,7 +95,7 @@ app.post("/loadnotes", (req, res) => {
     });
 });
 
-app.post("/updatenote", (req, res) => {
+app.post("/updatenote", auth, (req, res) => {
   Note.findByIdAndUpdate(
     req.body.note_id,
     { note_body: req.body.updatedText },
